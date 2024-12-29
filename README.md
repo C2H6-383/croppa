@@ -1,4 +1,17 @@
-# Croppa
+> [!IMPORTANT]
+> This is a Fork of https://github.com/BKWLD/croppa, which remains compatible with Laravel 11, and the newest version of Twill.
+> 
+> A Version of Croppa working with Laravel 11 requires v3 of Intervention/Image, but a dependency of Twill (Glide) requires v2 of Intervention/Image, As Composer does not allow two versions of the same package to be installed, the proposed package configuration is not viable.
+>
+> This Version of croppa works with Laravel 11 but uses Glide v2 as dependency and therefore should work with Twill. Therefore, this fork will cease to exist, after version 3 of Glide (which will use v3 of Intervention/Image) is released and incorporated into Twill.
+
+## Installation
+
+to install this package run `composer require ` TBD
+
+---
+
+# The original Croppa documentation
 
 [![Packagist](https://img.shields.io/packagist/v/bkwld/croppa.svg)](https://packagist.org/packages/bkwld/croppa)
 
