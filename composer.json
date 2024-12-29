@@ -1,13 +1,13 @@
 {
-    "name": "bkwld/croppa",
-    "description": "Image thumbnail creation through specially formatted URLs for Laravel",
+    "name": "c2h6/croppa-twill-compatible",
+    "description": "Fork of BKWLD/croppa, that remains compatible with area17/twill and Laravel 11",
     "keywords": [
         "image",
         "thumb",
         "resize",
         "laravel"
     ],
-    "homepage": "https://github.com/bkwld/croppa",
+    "homepage": "https://github.com/C2H6-383/croppa-twill-compatible",
     "license": "MIT",
     "authors": [
         {
@@ -22,7 +22,7 @@
         "illuminate/console": "^9.0|^10.0|^11.0",
         "illuminate/support": "^9.0|^10.0|^11.0",
         "illuminate/routing": "^9.0|^10.0|^11.0",
-        "intervention/image": "^3.6",
+        "intervention/image": "^2.7",
         "league/flysystem": "^3.0",
         "symfony/http-foundation": "^6.0|^7.0",
         "symfony/http-kernel": "^6.0|^7.0",

@@ -4,7 +4,6 @@ namespace Bkwld\Croppa;
 
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\Interfaces\ImageInterface;
 
 /**
  * Wraps Intervention Image with the API used by Croppa to transform the src image.
@@ -14,7 +13,7 @@ class Image
     /**
      * @var \Intervention\Image\Image
      */
-    private ImageInterface $image;
+    private $image;
 
     /**
      * @var int
@@ -40,8 +39,8 @@ class Image
 
     public function __construct(string $path, array $options = [])
     {
-        $manager = new ImageManager(new Driver());
-        $this->image = $manager->read($path);
+        $manager = new ImageManager(['driver' => 'gd']);
+        $this->image = $manager->make($path);
         $this->interlace = $options['interlace'];
         $this->upsize = $options['upsize'];
         if (isset($options['quality']) && is_array($options['quality'])) {
@@ -52,14 +51,35 @@ class Image
         $this->format = $options['format'] ?? $this->getFormatFromPath($path);
     }
 
-    /**
-     * Take the input from the URL and apply transformations on the image.
-     */
     public function process(?int $width, ?int $height, array $options = []): self
     {
-        $this->trim($options)
+        $this->autoRotate()
+            ->trim($options)
             ->resizeAndOrCrop($width, $height, $options)
             ->applyFilters($options);
+        if ($this->interlace) {
+            $this->interlace();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Turn on interlacing to make progessive JPEG files.
+     */
+    public function interlace(): self
+    {
+        $this->image->interlace();
+
+        return $this;
+    }
+
+    /**
+     * Auto rotate the image based on exif data.
+     */
+    public function autoRotate(): self
+    {
+        $this->image->orientate();
 
         return $this;
     }
@@ -120,7 +140,7 @@ class Image
         if (isset($options['quadrant'])) {
             return $this->cropQuadrant($width, $height, $options);
         }
-        if (isset($options['pad']) || in_array('pad', $options)) {
+        if (array_key_exists('pad', $options)) {
             $this->pad($width, $height, $options);
         }
         if (array_key_exists('resize', $options) || !$width || !$height) {
@@ -161,11 +181,11 @@ class Image
             'R' => 'right',
             'B' => 'bottom',
         ];
-        if (!$this->upsize) {
-            $this->image->coverDown($width, $height, $positions[$quadrant]);
-        } else {
-            $this->image->cover($width, $height, $positions[$quadrant]);
-        }
+        $this->image->fit($width, $height, function ($constraint) {
+            if (!$this->upsize) {
+                $constraint->upsize();
+            }
+        }, $positions[$quadrant]);
 
         return $this;
     }
@@ -175,11 +195,12 @@ class Image
      */
     public function resize(?int $width, ?int $height): self
     {
-        if (!$this->upsize) {
-            $this->image->scaleDown($width, $height);
-        } else {
-            $this->image->scale($width, $height);
-        }
+        $this->image->resize($width, $height, function ($constraint) {
+            $constraint->aspectRatio();
+            if (!$this->upsize) {
+                $constraint->upsize();
+            }
+        });
 
         return $this;
     }
@@ -189,11 +210,11 @@ class Image
      */
     public function crop(?int $width, ?int $height): self
     {
-        if (!$this->upsize) {
-            $this->image->coverDown($width, $height);
-        } else {
-            $this->image->cover($width, $height);
-        }
+        $this->image->fit($width, $height, function ($constraint) {
+            if (!$this->upsize) {
+                $constraint->upsize();
+            }
+        });
 
         return $this;
     }
@@ -207,17 +228,16 @@ class Image
         if (!$height || !$width) {
             throw new Exception('Croppa: Pad option needs width and height');
         }
+        $color = $options['pad'] ?: [255, 255, 255];
 
-        $rgbArray = $options['pad'] ?? [255, 255, 255];
-        $color = sprintf("#%02x%02x%02x", $rgbArray[0], $rgbArray[1], $rgbArray[2]);
+        $this->image->resize($width, $height, function ($constraint) {
+            $constraint->aspectRatio();
+            if (!$this->upsize) {
+                $constraint->upsize();
+            }
+        });
 
-        if (!$this->upsize) {
-            $this->image->scaleDown($width, $height);
-        } else {
-            $this->image->scale($width, $height);
-        }
-
-        $this->image->resizeCanvas($width, $height, $color, 'center');
+        $this->image->resizeCanvas($width, $height, 'center', false, $color);
 
         return $this;
     }
@@ -258,6 +278,6 @@ class Image
      */
     public function get(): string
     {
-        return $this->image->encodeByExtension($this->format, progressive: $this->interlace, quality: $this->quality);
+        return $this->image->encode($this->format, $this->quality);
     }
 }

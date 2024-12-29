@@ -29,16 +29,6 @@ final class Storage
     private $srcDisk;
 
     /**
-     * @var ?FilesystemAdapter
-     */
-    private $tmpDisk;
-
-    /**
-     * @var bool
-     */
-    private $tmpPath = '';
-
-    /**
      * Inject dependencies.
      */
     public function __construct(?array $config = null)
@@ -95,26 +85,6 @@ final class Storage
     }
 
     /**
-     * Set the tmp disk.
-     */
-    public function setTmpDisk(FilesystemAdapter $disk): void
-    {
-        $this->tmpDisk = $disk;
-    }
-
-    /**
-     * Get the tmp disk or make via the config.
-     */
-    public function getTmpDisk(): FilesystemAdapter
-    {
-        if (empty($this->tmpDisk)) {
-            $this->setTmpDisk($this->makeDisk($this->config['tmp_disk']));
-        }
-
-        return $this->tmpDisk;
-    }
-
-    /**
      * "Mount" disks given the config.
      */
     public function mount(): self
@@ -154,23 +124,13 @@ final class Storage
      */
     public function path(string $path): string
     {
-        $srcDisk = $this->getSrcDisk();
-        if ($srcDisk->fileExists($path)) {
-            if ($srcDisk->getAdapter() instanceof LocalFilesystemAdapter) {
-                return $srcDisk->path($path);
+        $disk = $this->getSrcDisk();
+        if ($disk->fileExists($path)) {
+            if ($disk->getAdapter() instanceof LocalFilesystemAdapter) {
+                return $disk->path($path);
             }
 
-            // If a tmp_disk has been configured, copy file from remote srcDisk to tmpDisk
-            if ($this->config['tmp_disk']) {
-                $tmpDisk = $this->getTmpDisk();
-                $tmpDisk->writeStream($path, $srcDisk->readStream($path));
-                $this->tmpPath = $path;
-                return $tmpDisk->path($path);
-            }
-
-            // With Intervention 3, this will lead to a DecoderException ("Unable to decode input")
-            // We should probably throw an exception here to inform the developer that a tmp_disk is required.
-            return $srcDisk->url($path);
+            return $disk->url($path);
         }
 
         throw new NotFoundHttpException('Croppa: Src image is missing');
@@ -187,18 +147,6 @@ final class Storage
             $this->getCropsDisk()->write($path, $contents);
         } catch (FilesystemException $e) {
             // don't throw exception anymore as mentioned in PR #164
-        }
-        $this->cleanup();
-    }
-
-    /**
-     * Cleanup: delete tmp file if required.
-     */
-    public function cleanup(): void
-    {
-        if ($this->tmpPath <> '') {
-            $this->getTmpDisk()->delete($this->tmpPath);
-            $this->tmpPath = '';
         }
     }
 
@@ -281,12 +229,12 @@ final class Storage
             function ($file) use ($filename) {
                 // Don't return the source image, we're JUST getting crops
                 return pathinfo($file['path'], PATHINFO_BASENAME) !== $filename
-            // Test that the crop begins with the src's path, that the crop is FOR
-            // the src
-            && mb_strpos(pathinfo($file['path'], PATHINFO_FILENAME), pathinfo($filename, PATHINFO_FILENAME)) === 0
+                    // Test that the crop begins with the src's path, that the crop is FOR
+                    // the src
+                    && mb_strpos(pathinfo($file['path'], PATHINFO_FILENAME), pathinfo($filename, PATHINFO_FILENAME)) === 0
 
-            // Make sure that the crop matches that Croppa file regex
-            && preg_match('#'.URL::PATTERN.'#', $file['path']);
+                    // Make sure that the crop matches that Croppa file regex
+                    && preg_match('#' . URL::PATTERN . '#', $file['path']);
             }
         ));
     }
@@ -307,10 +255,10 @@ final class Storage
 
                 // Check that the file matches the pattern and get at the parts to make to
                 // make the path to the src
-                if (!preg_match('#'.URL::PATTERN.'#', $file['path'], $matches)) {
+                if (!preg_match('#' . URL::PATTERN . '#', $file['path'], $matches)) {
                     return false;
                 }
-                $src = $matches[1].'.'.$matches[5];
+                $src = $matches[1] . '.' . $matches[5];
 
                 // Test that the src file exists
                 return $this->getSrcDisk()->fileExists($src);

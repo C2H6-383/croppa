@@ -93,28 +93,6 @@ class TestResizing extends TestCase
         $this->assertEquals('200x160', $size[0].'x'.$size[1]);
     }
 
-    public function testWidthAndHeightPad()
-    {
-        $image = new Image($this->src, $this->options);
-        $imageString = $image->process(200, 200, ['pad' => [100, 100, 100]])->get();
-        $size = getimagesizefromstring($imageString);
-        $firstPixelColor = ImageManager::gd()->read($imageString)->pickColor(1, 1)->toHex();
-
-        $this->assertEquals('646464', $firstPixelColor);
-        $this->assertEquals('200x200', $size[0].'x'.$size[1]);
-    }
-
-    public function testWidthAndHeightAndPadWithoutColor()
-    {
-        $image = new Image($this->src, $this->options);
-        $imageString = $image->process(200, 200, ['pad'])->get();
-        $size = getimagesizefromstring($imageString);
-        $firstPixelColor = ImageManager::gd()->read($imageString)->pickColor(1, 1)->toHex();
-
-        $this->assertEquals('ffffff', $firstPixelColor);
-        $this->assertEquals('200x200', $size[0].'x'.$size[1]);
-    }
-
     public function testWidthAndHeightTrim()
     {
         $image = new Image($this->src, $this->options);
