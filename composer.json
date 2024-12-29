@@ -1,5 +1,5 @@
 {
-    "name": "c2h6/croppa-twill-compatible",
+    "name": "bkwld/croppa",
     "description": "Fork of BKWLD/croppa, that remains compatible with area17/twill and Laravel 11",
     "keywords": [
         "image",
@@ -7,7 +7,7 @@
         "resize",
         "laravel"
     ],
-    "homepage": "https://github.com/C2H6-383/croppa-twill-compatible",
+    "homepage": "https://github.com/bkwld/croppa",
     "license": "MIT",
     "authors": [
         {
