@@ -1,13 +1,39 @@
 > [!IMPORTANT]
 > This is a Fork of https://github.com/BKWLD/croppa, which remains compatible with Laravel 11, and the newest version of Twill.
-> 
+>
 > A Version of Croppa working with Laravel 11 requires v3 of Intervention/Image, but a dependency of Twill (Glide) requires v2 of Intervention/Image, As Composer does not allow two versions of the same package to be installed, the proposed package configuration is not viable.
 >
 > This Version of croppa works with Laravel 11 but uses Glide v2 as dependency and therefore should work with Twill. Therefore, this fork will cease to exist, after version 3 of Glide (which will use v3 of Intervention/Image) is released and incorporated into Twill.
 
 ## Installation
 
-to install this package run `composer require ` TBD
+To install this package you need to modify your `composer.json` file manually to apply the patched version of croppa. Add croppa with the version `dev-master` to the required dependencies and this GitHub repository as package repository.
+
+Your composer file should look something like this after applying these changes:
+
+```json
+"..."
+"require": {
+    "..."
+    "bkwld/croppa": "dev-master",
+    "..."
+}
+"..."
+"repositories": {
+    "..."
+    {
+      "type": "vcs",
+      "url": "https://github.com/C2H6-383/croppa"
+    }
+    "..."
+}
+"..."
+```
+
+Now run `composer u` to update your dependencies.
+
+> [!TIP]
+> If you want to spice up the usage of Croppa in conjunction with twill, check out my Croppa adapter for Twill: https://github.com/C2H6-383/twill-croppa.
 
 ---
 
@@ -188,9 +214,9 @@ A module is included to prepare formatted URLs from JS. This can be helpful when
 Works just like the PHP `Croppa::url` except for how options get formatted (since JS doesn’t have associative arrays).
 
 ```js
-croppa.url('/path/to/img.jpg', 300, 200, ['resize']);
-croppa.url('/path/to/img.jpg', 300, 200, ['resize', { quadrant: 'T' }]);
-croppa.url('/path/to/img.jpg', 300, 200, ['resize', { quadrant: ['T'] }]);
+croppa.url("/path/to/img.jpg", 300, 200, ["resize"]);
+croppa.url("/path/to/img.jpg", 300, 200, ["resize", { quadrant: "T" }]);
+croppa.url("/path/to/img.jpg", 300, 200, ["resize", { quadrant: ["T"] }]);
 ```
 
 Run `php artisan asset:publish bkwld/croppa` to have Laravel copy the JS to your public directory. It will go to /public/packages/bkwld/croppa/js by default.
