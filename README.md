@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> This is a Fork of https://github.com/BKWLD/croppa, which remains compatible with Laravel 11, and the newest version of Twill.
+> This is a Fork of https://github.com/BKWLD/croppa, which remains compatible with Laravel 12, and the newest version of Twill.
 >
 > A Version of Croppa working with Laravel 11 requires v3 of Intervention/Image, but a dependency of Twill (Glide) requires v2 of Intervention/Image, As Composer does not allow two versions of the same package to be installed, the proposed package configuration is not viable.
 >
